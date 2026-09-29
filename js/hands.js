@@ -17,7 +17,7 @@ export class HandInput {
     await v.play();
     this.active = true;
     if (!this.landmarker) {
-      onStatus?.('despertando el detector de manos…');
+      onStatus?.('loading');
       vision = vision || await import('../vendor/mediapipe/vision_bundle.mjs');
       const { FilesetResolver, HandLandmarker } = vision;
       const fileset = await FilesetResolver.forVisionTasks(base + 'wasm');

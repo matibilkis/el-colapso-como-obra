@@ -26,6 +26,7 @@ export class Scene {
     this.dots = []; this.fx = []; this.trail = []; this.row = []; this.slot = 0; this.rowPos = 0;
     this.precPhase = 0; this.drivePhase = 0; this.handA = 0; this.povFlash = 0;
     this.serif = '"Fraunces", Georgia, serif';
+    this.labels = { pov: 'punto de vista', collapse: 'colapso' };
     this.resize();
     addEventListener('resize', () => this.resize());
   }
@@ -415,7 +416,7 @@ export class Scene {
       g.beginPath(); g.arc(pe.x, pe.y, r * 0.32, 0, TAU); g.fillStyle = rgba(C.ink, 0.9 * alpha); g.fill();
       if (this.modeT > 0.3 && !this.mobile && front) {
         g.font = `italic 400 ${Math.max(14, this.R * 0.065)}px ${this.serif}`; g.fillStyle = rgba(C.ink, 0.6 * this.modeT);
-        g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText('punto de vista', pe.x + r * 1.8, pe.y + 1);
+        g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(this.labels.pov, pe.x + r * 1.8, pe.y + 1);
       }
     }
     if (n[2] > 0.995 || !front) return;
@@ -493,7 +494,7 @@ export class Scene {
         g.save(); g.globalAlpha = al;
         this.ket(String(f.out), this.cx, this.cy + size * 0.28, size, f.out ? C.red : C.ink, 0.9, 'center', 300);
         g.font = `italic 400 ${Math.max(16, R * 0.09)}px ${this.serif}`; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = rgba(C.ink, 0.8);
-        g.fillText('colapso', this.cx, this.cy + size * 0.45);
+        g.fillText(this.labels.collapse, this.cx, this.cy + size * 0.45);
         g.restore();
         keep.push(f);
       }

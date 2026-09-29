@@ -4,6 +4,7 @@ import { MicInput } from './mic.js';
 import { HandInput } from './hands.js';
 import { Scene } from './scene.js';
 import { V, clamp, approach, smoothstep, qrand, TAU } from './util.js';
+import { t, lang, setLang, applyDom } from './i18n.js';
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -22,7 +23,7 @@ const S = {
 };
 
 // system size (Zurek's horizontal axis) -> dephasing rate. Illustrative, not quantitative.
-const SIZES = [[1.5, 'un átomo'], [4, 'una molécula'], [6, 'una proteína'], [9, 'un virus'], [12.5, 'una bacteria'], [19, 'una mota de polvo'], [99, 'un gato · nosotros']];
+const SIZE_LIMITS = [1.5, 4, 6, 9, 12.5, 19, 99]; // atom, molecule, protein, virus, bacterium, dust, cat
 const gammaOf = k => (k < 0.8 ? 0 : 0.012 * Math.pow(10, (k - 0.8) / 5.2));
 const kappaOf = k => smoothstep(2.5, 17, k);
 const pitchToOmega = f => 0.25 + 6.5 * clamp(Math.log2(f / 90) / Math.log2(700 / 90));
@@ -59,7 +60,7 @@ function setMode(m) {
   S.mode = m;
   document.body.dataset.mode = m;
   $$('.mode').forEach(b => { const on = b.dataset.mode === m; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
-  $('#lookTxt').textContent = m === 'measure' ? 'un tiro' : 'mirar';
+  setLookTxt();
   if (m === 'measure') resetStats(); else audio.setPad(false, 0.5);
   audio.chime(m === 'measure');
   hintIdx = 0; showHint(true);
@@ -98,8 +99,8 @@ function applyDrag(dx, dy, gain) {
 
 function setSize(k) {
   S.k = k; S.gamma = gammaOf(k);
-  const name = SIZES.find(([lim]) => k < lim)[1];
-  $('#sizeTxt').innerHTML = k < 0.5 ? `1 átomo` : `10<sup>${Math.round(k)}</sup> átomos · ${name}`;
+  const name = t('sizes')[SIZE_LIMITS.findIndex(lim => k < lim)];
+  $('#sizeTxt').innerHTML = k < 0.5 ? t('size.one') : `10<sup>${Math.round(k)}</sup> ${t('size.many')} · ${name}`;
   $('#size').value = k;
 }
 
@@ -110,12 +111,12 @@ async function toggleCam() {
   btn.classList.add('busy');
   try {
     $('#camBubble').hidden = false;
-    await hands.start(msg => toast(msg));
+    await hands.start(() => toast(t('toast.hands')));
     btn.setAttribute('aria-pressed', 'true');
-    toast('mostrá la mano · pellizcá para agarrar');
+    toast(t('toast.camOn'));
   } catch (err) {
     console.error(err); hands.stop(); $('#camBubble').hidden = true;
-    toast('no pude abrir la cámara');
+    toast(t('toast.camErr'));
   } finally { btn.classList.remove('busy'); hintIdx = 1; showHint(true); }
 }
 
@@ -127,8 +128,8 @@ async function toggleMic() {
     await audio.init();
     await mic.start(audio.ctx);
     btn.setAttribute('aria-pressed', 'true');
-    toast('cantá · o aplaudí para mirar');
-  } catch (err) { console.error(err); toast('no pude abrir el micrófono'); }
+    toast(t('toast.micOn'));
+  } catch (err) { console.error(err); toast(t('toast.micErr')); }
   finally { btn.classList.remove('busy'); hintIdx = 2; showHint(true); }
 }
 
@@ -152,26 +153,9 @@ function toggleAuto(force) {
 }
 
 // ---------- hints & toasts ----------
-const HINTS = {
-  manip: [
-    ['', 'Arrastrá la esfera como un globo para rotar el estado · doble toque o espacio para mirar'],
-    ['cam', 'Pellizcá en el aire (pulgar + índice) y mové la mano: el qubit te sigue'],
-    ['mic', 'Cantá: el volumen empuja el estado entre 0 y 1; la altura de tu voz lo hace girar · un aplauso lo mide'],
-    ['', 'El trazo rojo es el estado. La superposición suena como acorde: grave (0) y agudo (1) a la vez'],
-    ['', 'Subí el tamaño: el entorno se enreda con el qubit, apaga la coherencia y el azul se vuelve gris'],
-  ],
-  measure: [
-    ['', 'Preparar y medir, una y otra vez: punto negro = 0 (grave) · punto rojo = 1 (agudo)'],
-    ['', 'Más ceros → más grave · más unos → más agudo · las frecuencias tienden a la regla de Born'],
-    ['', 'Cambiá el punto de vista (z · x · y, o arrastrando): el mismo estado da otras respuestas'],
-    ['', 'Probá |+⟩: medido en z es azar puro; medido en x da siempre 0'],
-    ['', 'Con decoherencia, |+⟩ en x deja de dar siempre 0: el entorno ya lo miró'],
-    ['cam', 'Pellizcá y mové la mano para girar el ojo (el punto de vista)'],
-  ],
-};
 let hintIdx = 0, hintT = 0;
 function showHint(now) {
-  const list = HINTS[S.mode].filter(([req]) => !req || (req === 'cam' ? hands.active : mic.active));
+  const list = t('hints')[S.mode].filter(([req]) => !req || (req === 'cam' ? hands.active : mic.active));
   const el = $('#hint');
   const set = () => { el.textContent = list[hintIdx % list.length][1]; el.classList.remove('fade'); };
   hintT = 0;
@@ -182,6 +166,13 @@ let toastTimer = 0;
 function toast(msg) {
   const el = $('#toast'); el.textContent = msg; el.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+function setLookTxt() { $('#lookTxt').textContent = t(S.mode === 'measure' ? 'look.shot' : 'look'); }
+function switchLang(l = lang === 'es' ? 'en' : 'es') {
+  setLang(l);
+  $('#tempoTxt').textContent = S.tempo;
+  setLookTxt(); setSize(S.k); showHint(true);
+  scene.labels = { pov: t('scene.pov'), collapse: t('scene.collapse') };
 }
 function flashLook() { const b = $('#btnLook'); b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
 
@@ -195,18 +186,18 @@ function updateUI(p0, coh) {
     if (b < 0.005) html = '<span class="k">|ψ⟩ = |0⟩</span>';
     else if (a < 0.005) html = '<span class="k">|ψ⟩ = |1⟩</span>';
     else html = `<span class="k">|ψ⟩ = ${fmt(a)}|0⟩</span> <span class="k">+ ${fmt(b)} e<sup>i·${fmt(ph / Math.PI)}π</sup>|1⟩</span>`;
-    html += '<small>estado puro</small>';
+    html += `<small>${t('ket.pure')}</small>`;
   } else if (cz < 0.03) {
     const z0 = (1 + q.r[2]) / 2;
-    html = `<span class="k">ρ = ${fmt(z0)}|0⟩⟨0| + ${fmt(1 - z0)}|1⟩⟨1|</span><small>mezcla clásica: el entorno ya "sabe"</small>`;
+    html = `<span class="k">ρ = ${fmt(z0)}|0⟩⟨0| + ${fmt(1 - z0)}|1⟩⟨1|</span><small>${t('ket.mixed')}</small>`;
   } else {
-    html = `<span class="k">ρ: pureza ${fmt(pur)}</span><small>parcialmente coherente: el entorno está mirando</small>`;
+    html = `<span class="k">ρ: ${t('ket.purity')} ${fmt(pur)}</span><small>${t('ket.partial')}</small>`;
   }
   $('#ketLine').innerHTML = html;
   $('#p0bar').style.width = `${p0 * 100}%`;
   $('#p0txt').textContent = `${Math.round(p0 * 100)}%`;
   $('#p1txt').textContent = `${Math.round((1 - p0) * 100)}%`;
-  $('#povTxt').textContent = S.axis ? `eje ${S.axis}` : 'eje libre';
+  $('#povTxt').textContent = S.axis ? t('axis')(S.axis) : t('axis.free');
   $('#cohBar').style.width = `${coh * 100}%`;
   $('#purBar').style.width = `${pur * 100}%`;
   $('#vu').style.width = `${(mic.active ? mic.level : 0) * 100}%`;
@@ -216,7 +207,7 @@ function updateUI(p0, coh) {
     $('#f1bar').style.opacity = n ? 1 : 0;
     $('#bornTick').style.left = `${p0 * 100}%`;
     $('#c0').textContent = n - n1; $('#c1').textContent = n1;
-    $('#ctot').textContent = `${S.total} tiros`;
+    $('#ctot').textContent = `${S.total} ${t('count.shots')}`;
   }
 }
 
@@ -303,6 +294,7 @@ $('#btnSound').addEventListener('click', toggleSound);
 $('#btnTheme').addEventListener('click', toggleTheme);
 $('#btnInfo').addEventListener('click', () => $('#info').showModal());
 $('#btnQR').addEventListener('click', openQR);
+$('#btnLang').addEventListener('click', () => switchLang());
 $$('dialog').forEach(d => {
   d.addEventListener('click', e => { if (e.target === d || e.target.hasAttribute('data-close')) d.close(); });
 });
@@ -344,6 +336,7 @@ addEventListener('keydown', e => {
     case 's': case 'S': toggleSound(); break;
     case 't': case 'T': toggleTheme(); break;
     case 'q': case 'Q': openQR(); break;
+    case 'l': case 'L': switchLang(); break;
     case '?': $('#info').showModal(); break;
     case 'f': case 'F': document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); break;
     case 'h': case 'H': document.body.classList.toggle('clean'); break;
@@ -437,6 +430,8 @@ ro.observe($('#panel')); ro.observe($('.dock'));
 addEventListener('resize', () => fitScene(true));
 
 makeGrain();
+applyDom();
+switchLang(lang);
 setSize(0);
 showHint(true);
 updateUI(1, 0);
