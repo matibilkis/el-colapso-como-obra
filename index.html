@@ -1,19 +1,19 @@
 <!doctype html>
-<html lang="es" data-theme="day">
+<html lang="es" data-theme="bleu">
 <head>
 <meta charset="utf-8">
 <script>if (location.protocol === 'http:' && !/^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname)) location.replace('https:' + location.href.slice(5));</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <title>El colapso como obra</title>
 <meta name="description" content="Una esfera de Bloch para tocar, cantar y escuchar: superposición, medición y decoherencia. Rucha Benare y Matías Bilkis.">
-<meta name="theme-color" content="#f3ead7">
+<meta name="theme-color" content="#689ce0">
 <meta property="og:title" content="El colapso como obra">
 <meta property="og:description" content="Una esfera de Bloch para tocar, cantar y escuchar: superposición, medición y decoherencia.">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23f3ead7'/%3E%3Ccircle cx='33' cy='34' r='14' fill='%23d64432'/%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='%231e1b18' stroke-width='3.5'/%3E%3Cpath d='M32 4v10M32 50v10M4 32h10M50 32h10' stroke='%231e1b18' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23689ce0'/%3E%3Cpath d='M20 12 L16 50' stroke='%23e54826' stroke-width='8' stroke-linecap='round'/%3E%3Ccircle cx='40' cy='36' r='7' fill='%230f1526'/%3E%3Ccircle cx='53' cy='37' r='3.5' fill='%230f1526'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400..700&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Math&text=%E2%9F%A9%E2%9F%A8%CF%88%CF%81%CE%B8%CF%86%E2%88%92%E2%99%AF&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -43,8 +43,8 @@
       <div class="ketline" id="ketLine"></div>
       <div class="pbar" aria-hidden="true"><span class="p0" id="p0bar"></span><span class="p1" id="p1bar"></span></div>
       <div class="plabels">
-        <span><i class="sw moon"></i>0 · grave <b id="p0txt">100%</b></span>
-        <span><b id="p1txt">0%</b> agudo · 1<i class="sw sun"></i></span>
+        <span><i class="sw zero"></i>0 · grave <b id="p0txt">100%</b></span>
+        <span><b id="p1txt">0%</b> agudo · 1<i class="sw one"></i></span>
       </div>
       <div class="pov">desde el punto de vista <strong id="povTxt">z</strong></div>
       <div class="meters">
@@ -86,7 +86,7 @@
         <span class="tot" id="ctot">0 tiros</span>
         <span><b id="c1">0</b> unos</span>
       </div>
-      <p class="note">barra: frecuencias (últimos 64 tiros) · marca: regla de Born</p>
+      <p class="note">barra: frecuencias en los últimos 64 tiros · marca blanca: regla de Born</p>
     </section>
   </aside>
 
@@ -127,14 +127,14 @@
 <dialog id="info" class="sheet">
   <button class="close" data-close aria-label="cerrar">×</button>
   <h3>¿Qué estoy viendo?</h3>
-  <p><b>La esfera de Bloch.</b> Cada punto es un estado posible de un qubit, <span class="m">|ψ⟩ = cos(θ/2)|0⟩ + e<sup>iφ</sup> sin(θ/2)|1⟩</span>. El polo norte es <span class="m">|0⟩</span> (la luna, grave); el sur, <span class="m">|1⟩</span> (el sol, agudo). Todo lo demás es superposición.</p>
-  <p><b>Manipular.</b> Rotar el estado es aplicar compuertas. La superposición suena como un acorde: el grave y el agudo a la vez, cada uno con el peso de su amplitud. La nota del medio (fa♯) es la coherencia, la parte genuinamente cuántica; la estrella amarilla gira con la fase φ. Tu voz es el Hamiltoniano: el volumen empuja el estado entre 0 y 1 (oscilaciones de Rabi) y la altura fija la frecuencia con la que gira (energía = frecuencia).</p>
-  <p><b>Medir.</b> Mirar es elegir un punto de vista, un eje, y hacerle una pregunta al qubit: la respuesta es 0 o 1, al azar, y el estado colapsa. Preparando y midiendo muchas veces, las frecuencias se acercan a la regla de Born. Cambiar el punto de vista cambia la realidad que escuchás.</p>
-  <p><b>El entorno.</b> Los signos que flotan son el entorno. Cuanto más grande el sistema, más rápido se enredan con el qubit (los hilos) y guardan registros de lo que "ven": la coherencia se apaga, el color se vuelve grafito y el acorde queda vacío. Así emerge lo clásico: nadie necesita mirar, el mundo ya miró. Medida en z, una mezcla suena igual que una superposición; en x, no.</p>
+  <p><b>La esfera de Bloch.</b> Cada punto es un estado posible de un qubit, <span class="m">|ψ⟩ = cos(θ/2)|0⟩ + e<sup>iφ</sup> sin(θ/2)|1⟩</span>. El polo norte es <span class="m">|0⟩</span> (punto negro, grave); el sur, <span class="m">|1⟩</span> (punto rojo, agudo). Todo lo demás es superposición.</p>
+  <p><b>Manipular.</b> Rotar el estado es aplicar compuertas. La superposición suena como un acorde: el grave y el agudo a la vez, cada uno con el peso de su amplitud. La nota del medio (fa♯) es la coherencia, la parte genuinamente cuántica; se ve como el resplandor claro alrededor del trazo rojo, que es el estado. Tu voz es el Hamiltoniano: el volumen empuja el estado entre 0 y 1 (oscilaciones de Rabi) y la altura fija la frecuencia con la que gira (energía = frecuencia).</p>
+  <p><b>Medir.</b> Mirar es elegir un punto de vista, un eje, y hacerle una pregunta al qubit: la respuesta es 0 o 1, al azar, y el estado colapsa. Cada respuesta cae como un punto en la fila de abajo, negro si es 0, rojo si es 1. Preparando y midiendo muchas veces, las frecuencias se acercan a la regla de Born. Cambiar el punto de vista cambia la realidad que escuchás.</p>
+  <p><b>El entorno.</b> Los puntos que flotan son el entorno. Cuanto más grande el sistema, más rápido se enredan con el qubit (los hilos) y guardan registros de lo que "ven": la coherencia se apaga, el azul se vuelve gris y el acorde queda vacío. Así emerge lo clásico: nadie necesita mirar, el mundo ya miró. Medida en z, una mezcla suena igual que una superposición; en x, no.</p>
   <p class="fine">Simulación de un qubit en el navegador (vector de Bloch con desfase en la base z). El azar viene del generador criptográfico del navegador, no de un qubit real, y la escala de tamaños es ilustrativa. Detector de manos: MediaPipe, local.</p>
   <h4>Atajos</h4>
   <p class="keys"><kbd>espacio</kbd> mirar · <kbd>M</kbd> modo · <kbd>0</kbd> <kbd>1</kbd> <kbd>+</kbd> <kbd>−</kbd> <kbd>i</kbd> preparar · <kbd>Z</kbd> <kbd>X</kbd> <kbd>Y</kbd> punto de vista · <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> rotar · <kbd>P</kbd> tiros · <kbd>[</kbd> <kbd>]</kbd> tamaño · <kbd>C</kbd> manos · <kbd>V</kbd> voz · <kbd>S</kbd> sonido · <kbd>T</kbd> noche · <kbd>Q</kbd> QR · <kbd>F</kbd> pantalla completa · <kbd>H</kbd> ocultar interfaz</p>
-  <p class="credits">A partir de «Quantum &amp; Arts: a dialogue», de Rucha Benare y Matías Bilkis. Homenaje a Joan Miró y a «The Border Territory», de W. H. Zurek (<i>Physics Today</i>, 1991).</p>
+  <p class="credits">A partir de «Quantum &amp; Arts: a dialogue», de Rucha Benare y Matías Bilkis. Homenaje a <i>Bleu II</i> de Joan Miró y a «The Border Territory», de W. H. Zurek (<i>Physics Today</i>, 1991).</p>
 </dialog>
 
 <dialog id="qr" class="sheet qr">

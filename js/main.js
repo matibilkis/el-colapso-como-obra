@@ -139,9 +139,9 @@ function toggleSound() {
 
 function toggleTheme() {
   const night = document.documentElement.dataset.theme !== 'night';
-  document.documentElement.dataset.theme = night ? 'night' : 'day';
-  scene.theme = night ? 'night' : 'day';
-  document.querySelector('meta[name="theme-color"]').content = night ? '#0e1632' : '#f3ead7';
+  document.documentElement.dataset.theme = night ? 'night' : 'bleu';
+  scene.theme = night ? 'night' : 'bleu';
+  document.querySelector('meta[name="theme-color"]').content = night ? '#121f46' : '#689ce0';
   makeGrain();
 }
 
@@ -157,11 +157,11 @@ const HINTS = {
     ['', 'Arrastrá la esfera como un globo para rotar el estado · doble toque o espacio para mirar'],
     ['cam', 'Pellizcá en el aire (pulgar + índice) y mové la mano: el qubit te sigue'],
     ['mic', 'Cantá: el volumen empuja el estado entre 0 y 1; la altura de tu voz lo hace girar · un aplauso lo mide'],
-    ['', 'La superposición suena como acorde: grave (0) y agudo (1) a la vez; la nota del medio es la coherencia'],
-    ['', 'Subí el tamaño: el entorno se enreda con el qubit, apaga la coherencia y el color se vuelve grafito'],
+    ['', 'El trazo rojo es el estado. La superposición suena como acorde: grave (0) y agudo (1) a la vez'],
+    ['', 'Subí el tamaño: el entorno se enreda con el qubit, apaga la coherencia y el azul se vuelve gris'],
   ],
   measure: [
-    ['', 'Preparar y medir, una y otra vez: luna = 0 (grave) · sol = 1 (agudo)'],
+    ['', 'Preparar y medir, una y otra vez: punto negro = 0 (grave) · punto rojo = 1 (agudo)'],
     ['', 'Más ceros → más grave · más unos → más agudo · las frecuencias tienden a la regla de Born'],
     ['', 'Cambiá el punto de vista (z · x · y, o arrastrando): el mismo estado da otras respuestas'],
     ['', 'Probá |+⟩: medido en z es azar puro; medido en x da siempre 0'],
@@ -223,9 +223,9 @@ function updateUI(p0, coh) {
 // ---------- grain ----------
 function makeGrain() {
   const c = document.createElement('canvas'); c.width = c.height = 220;
-  const g = c.getContext('2d'), img = g.createImageData(220, 220), night = scene.theme === 'night';
-  for (let i = 0; i < img.data.length; i += 4) {
-    const v = night ? 255 * Math.random() ** 3 : 255 - 70 * Math.random() ** 2.2;
+  const g = c.getContext('2d'), img = g.createImageData(220, 220);
+  for (let i = 0; i < img.data.length; i += 4) { // mid-grey noise, blended as overlay: canvas tooth
+    const v = 128 + (Math.random() - 0.5) * 110;
     img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255;
   }
   g.putImageData(img, 0, 0);
@@ -363,7 +363,11 @@ let last = performance.now(), lastUi = 0;
 function frame(ts) {
   const now = ts / 1000, dt = clamp((ts - last) / 1000, 0.001, 0.05);
   last = ts;
-  const hand = hands.update();
+  if (!S.stepped) tick(dt, now);
+  requestAnimationFrame(frame);
+}
+function tick(dt, now) {
+  const hand = S.fakeHand || hands.update();
   const m = mic.update(dt, now);
   handleHand(hand);
 
@@ -411,9 +415,8 @@ function frame(ts) {
     omega: S.omega, drive, mode: S.mode, kappa: kappaOf(S.k), k01: S.k / 23, hand,
   }, dt);
 
-  if (now - lastUi > 0.08) { updateUI(p0, coh); lastUi = now; }
-  if ((hintT += dt) > 8 && S.started) showHint(false);
-  requestAnimationFrame(frame);
+  if (now - lastUi > 0.08 || S.stepped) { updateUI(p0, coh); lastUi = now; }
+  if ((hintT += dt) > 8 && S.started && !S.stepped) showHint(false);
 }
 
 // ---------- layout: the sphere lives in whatever space the interface leaves free ----------
@@ -442,4 +445,6 @@ document.fonts?.ready.then(() => { scene.resize(); fitScene(true); });
 requestAnimationFrame(frame);
 
 // debug handle for the console / tests
-window.__bloch = { S, q, scene, audio, hands, mic, setMode, prepare, setAxis, setSize, look, enter };
+// deterministic stepping (used to render the explainer video frame by frame)
+function step(dt) { S.simT = (S.simT || 0) + dt; tick(dt, S.simT); }
+window.__bloch = { S, q, scene, audio, hands, mic, setMode, prepare, setAxis, setSize, look, enter, step, toggleAuto, fitScene };

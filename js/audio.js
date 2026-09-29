@@ -4,7 +4,8 @@ const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 const PENTA = [0, 2, 4, 7, 9];                       // D major pentatonic
 const LADDER = [50, 52, 54, 57, 59, 62, 64, 66, 69]; // D3 .. A4, for the pattern pad
 
-// Voices: |0> = D3 (moon, low), |1> = A4 (sun, high), coherence = F#4 (the "colour" third)
+// Voices: |0> = D3 (low), |1> = A4 (high), coherence = F#4 (the "colour" third).
+// When `rec` is an array every call is logged with `recClock()` instead of played (offline video render).
 export class AudioEngine {
   constructor() { this.ctx = null; this.on = true; this._lastDrone = -1; }
 
@@ -88,6 +89,7 @@ export class AudioEngine {
 
   // continuous voice of the state (manipulate mode)
   setDrone({ p0, coh, phi, omega, on }) {
+    if (this.rec) { this.rec.push([this.recClock(), 'setDrone', [{ p0, coh, phi, omega, on }]]); return; }
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
     if (t - this._lastDrone < 0.03) return;
@@ -105,6 +107,7 @@ export class AudioEngine {
 
   // pattern pad (measure mode): pitch follows the fraction of ones
   setPad(on, f1) {
+    if (this.rec) { this.rec.push([this.recClock(), 'setPad', [on, f1]]); return; }
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
     const m = LADDER[Math.round(Math.max(0, Math.min(1, f1)) * 8)];
@@ -113,8 +116,9 @@ export class AudioEngine {
     this.padBus.gain.setTargetAtTime(on ? 0.1 : 0, t, 0.35);
   }
 
-  // one measurement outcome: 0 = low wooden moon, 1 = high glass sun
+  // one measurement outcome: 0 = low and wooden, 1 = high and glassy
   pluck(out, degree = 0, delay = 0, vel = 1) {
+    if (this.rec) { this.rec.push([this.recClock(), 'pluck', [out, degree, delay, vel]]); return; }
     if (!this.ctx || !this.on) return;
     const c = this.ctx, t = c.currentTime + 0.004 + delay;
     const midi = (out === 0 ? 50 : 74) + PENTA[degree % 5];
@@ -144,6 +148,7 @@ export class AudioEngine {
 
   // the environment becomes entangled with the qubit: a tiny glassy tick
   tick() {
+    if (this.rec) { this.rec.push([this.recClock(), 'tick', []]); return; }
     if (!this.ctx || !this.on) return;
     const c = this.ctx, t = c.currentTime + 0.002;
     const f = mtof(81 + PENTA[Math.floor(qrand() * 5)]);
@@ -154,6 +159,7 @@ export class AudioEngine {
 
   // a single, destructive look: swoosh + the outcome, louder
   collapse(out) {
+    if (this.rec) { this.rec.push([this.recClock(), 'collapse', [out]]); return; }
     if (!this.ctx || !this.on) return;
     const c = this.ctx, t = c.currentTime + 0.003;
     const len = Math.floor(c.sampleRate * 0.5), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
@@ -170,6 +176,7 @@ export class AudioEngine {
   }
 
   chime(up = true) {
+    if (this.rec) { this.rec.push([this.recClock(), 'chime', [up]]); return; }
     if (!this.ctx || !this.on) return;
     this.pluck(up ? 1 : 0, 3, 0, 0.35);
     this.pluck(up ? 1 : 0, up ? 4 : 1, 0.09, 0.3);
