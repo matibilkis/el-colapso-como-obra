@@ -368,7 +368,7 @@ function frame(ts) {
 }
 function tick(dt, now) {
   const hand = S.fakeHand || hands.update();
-  const m = mic.update(dt, now);
+  const m = S.fakeMic || mic.update(dt, now);
   handleHand(hand);
 
   if (S.nTarget) {
