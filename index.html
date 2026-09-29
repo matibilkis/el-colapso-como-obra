@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>El colapso como obra</title>
+<meta name="description" content="Una esfera de Bloch para tocar, cantar y escuchar: superposición, medición y decoherencia. Rucha Benare y Matías Bilkis.">
+<meta name="theme-color" content="#f3ead7">
+<meta property="og:title" content="El colapso como obra">
+<meta property="og:description" content="Una esfera de Bloch para tocar, cantar y escuchar: superposición, medición y decoherencia.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23f3ead7'/%3E%3Ccircle cx='33' cy='34' r='14' fill='%23d64432'/%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='%231e1b18' stroke-width='3.5'/%3E%3Cpath d='M32 4v10M32 50v10M4 32h10M50 32h10' stroke='%231e1b18' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400..700&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Math&text=%E2%9F%A9%E2%9F%A8%CF%88%CF%81%CE%B8%CF%86%E2%88%92%E2%99%AF&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-mode="manip">
+
+<canvas id="stage" aria-label="Esfera de Bloch interactiva"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="brand">
+  <h1>El colapso <em>como obra</em></h1>
+  <p>una esfera de Bloch para tocar, cantar y escuchar</p>
+</header>
+
+<nav class="sensors" aria-label="Sensores y opciones">
+  <button class="chip" id="btnCam" aria-pressed="false" title="cámara: las manos manipulan (C)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 12V6a1.5 1.5 0 0 1 3 0v5M10.5 10V4.5a1.5 1.5 0 0 1 3 0V10M13.5 10V5.5a1.5 1.5 0 0 1 3 0V11M16.5 10.5V8a1.5 1.5 0 0 1 3 0v6a7 7 0 0 1-7 7h-.8a6 6 0 0 1-4.9-2.6l-3-4.4a1.6 1.6 0 0 1 2.5-2l1.2 1.4"/></svg><span class="lbl">manos</span></button>
+  <button class="chip" id="btnMic" aria-pressed="false" title="micrófono: la voz es el Hamiltoniano, el aplauso mide (V)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg><span class="lbl">voz</span><span class="vu"><i id="vu"></i></span></button>
+  <button class="chip" id="btnSound" aria-pressed="true" title="sonido (S)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="w" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><span class="lbl">sonido</span></button>
+  <button class="chip icon" id="btnTheme" title="día / noche (T)" aria-label="día o noche">◐</button>
+  <button class="chip icon" id="btnQR" title="abrir en el celular (Q)" aria-label="código QR">QR</button>
+  <button class="chip icon" id="btnInfo" title="¿qué estoy viendo? (?)" aria-label="información">?</button>
+</nav>
+
+<div class="hud">
+  <aside class="panel" id="panel">
+    <section class="card state">
+      <h2>estado</h2>
+      <div class="ketline" id="ketLine"></div>
+      <div class="pbar" aria-hidden="true"><span class="p0" id="p0bar"></span><span class="p1" id="p1bar"></span></div>
+      <div class="plabels">
+        <span><i class="sw moon"></i>0 · grave <b id="p0txt">100%</b></span>
+        <span><b id="p1txt">0%</b> agudo · 1<i class="sw sun"></i></span>
+      </div>
+      <div class="pov">desde el punto de vista <strong id="povTxt">z</strong></div>
+      <div class="meters">
+        <div class="meter"><span>coherencia</span><div class="track"><i id="cohBar" class="y"></i></div></div>
+        <div class="meter"><span>pureza</span><div class="track"><i id="purBar"></i></div></div>
+      </div>
+    </section>
+
+    <section class="card prep manip-only">
+      <h2>preparar</h2>
+      <div class="kets">
+        <button class="kbtn" data-prep="0">|0⟩</button>
+        <button class="kbtn" data-prep="1">|1⟩</button>
+        <button class="kbtn" data-prep="+">|+⟩</button>
+        <button class="kbtn" data-prep="-">|−⟩</button>
+        <button class="kbtn" data-prep="+i">|+i⟩</button>
+      </div>
+      <label class="slider energy">
+        <span>energía <small>(giro del Hamiltoniano)</small></span>
+        <input type="range" id="energy" min="0" max="4" step="0.05" value="0">
+      </label>
+    </section>
+
+    <section class="card meas measure-only">
+      <h2>medir</h2>
+      <div class="axes">
+        <span>punto de vista</span>
+        <button class="abtn active" data-axis="z">z</button>
+        <button class="abtn" data-axis="x">x</button>
+        <button class="abtn" data-axis="y">y</button>
+      </div>
+      <div class="shots">
+        <button class="play" id="btnPlay" aria-pressed="true" title="tiros automáticos (P)"><span class="i-pause"></span></button>
+        <label class="slider tempo"><span>ritmo <b id="tempoTxt">4</b> tiros/s</span><input type="range" id="tempo" min="0.5" max="12" step="0.5" value="4"></label>
+      </div>
+      <div class="pbar freq" aria-hidden="true"><span class="p0" id="f0bar"></span><span class="p1" id="f1bar"></span><i class="born" id="bornTick"></i></div>
+      <div class="plabels">
+        <span><b id="c0">0</b> ceros</span>
+        <span class="tot" id="ctot">0 tiros</span>
+        <span><b id="c1">0</b> unos</span>
+      </div>
+      <p class="note">barra: frecuencias (últimos 64 tiros) · marca: regla de Born</p>
+    </section>
+  </aside>
+
+  <div class="dock">
+    <p class="hint" id="hint"></p>
+    <div class="row">
+      <div class="modes" role="tablist">
+        <button role="tab" class="mode active" data-mode="manip" aria-selected="true"><b>Manipular</b><small>superposición</small></button>
+        <button role="tab" class="mode" data-mode="measure" aria-selected="false"><b>Medir</b><small>colapso</small></button>
+      </div>
+      <button class="look" id="btnLook" title="mirar (espacio)"><span class="eye-ico"></span><span id="lookTxt">mirar</span></button>
+    </div>
+    <div class="zurek">
+      <div class="ztop"><span>dominio cuántico</span><strong id="sizeTxt">1 átomo</strong><span>dominio clásico</span></div>
+      <input type="range" id="size" min="0" max="23" step="0.1" value="0" aria-label="tamaño del sistema en número de átomos">
+      <div class="zbot"><span>1</span><span>tamaño (# de átomos)</span><span>10<sup>23</sup></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="cam" id="camBubble" hidden><video id="video" playsinline muted></video></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<section class="intro" id="intro">
+  <div class="intro-card">
+    <p class="kicker">Quantum &amp; Arts · un diálogo</p>
+    <h2>El colapso<br><em>como obra</em></h2>
+    <p class="lede">Una esfera de Bloch para tocar, cantar y escuchar.<br>Superposición, medición y decoherencia, con las manos, la voz y el oído.</p>
+    <div class="intro-actions">
+      <button class="big" id="enterAll">entrar con cámara y micrófono</button>
+      <button class="big ghost" id="enterTouch">entrar solo con el tacto</button>
+    </div>
+    <p class="credits">Rucha Benare · Matías Bilkis</p>
+    <p class="fine">Mejor con parlantes o auriculares. La cámara y el micrófono se procesan en tu dispositivo; nada se envía.</p>
+  </div>
+</section>
+
+<dialog id="info" class="sheet">
+  <button class="close" data-close aria-label="cerrar">×</button>
+  <h3>¿Qué estoy viendo?</h3>
+  <p><b>La esfera de Bloch.</b> Cada punto es un estado posible de un qubit, <span class="m">|ψ⟩ = cos(θ/2)|0⟩ + e<sup>iφ</sup> sin(θ/2)|1⟩</span>. El polo norte es <span class="m">|0⟩</span> (la luna, grave); el sur, <span class="m">|1⟩</span> (el sol, agudo). Todo lo demás es superposición.</p>
+  <p><b>Manipular.</b> Rotar el estado es aplicar compuertas. La superposición suena como un acorde: el grave y el agudo a la vez, cada uno con el peso de su amplitud. La nota del medio (fa♯) es la coherencia, la parte genuinamente cuántica; la estrella amarilla gira con la fase φ. Tu voz es el Hamiltoniano: el volumen empuja el estado entre 0 y 1 (oscilaciones de Rabi) y la altura fija la frecuencia con la que gira (energía = frecuencia).</p>
+  <p><b>Medir.</b> Mirar es elegir un punto de vista, un eje, y hacerle una pregunta al qubit: la respuesta es 0 o 1, al azar, y el estado colapsa. Preparando y midiendo muchas veces, las frecuencias se acercan a la regla de Born. Cambiar el punto de vista cambia la realidad que escuchás.</p>
+  <p><b>El entorno.</b> Los signos que flotan son el entorno. Cuanto más grande el sistema, más rápido se enredan con el qubit (los hilos) y guardan registros de lo que "ven": la coherencia se apaga, el color se vuelve grafito y el acorde queda vacío. Así emerge lo clásico: nadie necesita mirar, el mundo ya miró. Medida en z, una mezcla suena igual que una superposición; en x, no.</p>
+  <p class="fine">Simulación de un qubit en el navegador (vector de Bloch con desfase en la base z). El azar viene del generador criptográfico del navegador, no de un qubit real, y la escala de tamaños es ilustrativa. Detector de manos: MediaPipe, local.</p>
+  <h4>Atajos</h4>
+  <p class="keys"><kbd>espacio</kbd> mirar · <kbd>M</kbd> modo · <kbd>0</kbd> <kbd>1</kbd> <kbd>+</kbd> <kbd>−</kbd> <kbd>i</kbd> preparar · <kbd>Z</kbd> <kbd>X</kbd> <kbd>Y</kbd> punto de vista · <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> rotar · <kbd>P</kbd> tiros · <kbd>[</kbd> <kbd>]</kbd> tamaño · <kbd>C</kbd> manos · <kbd>V</kbd> voz · <kbd>S</kbd> sonido · <kbd>T</kbd> noche · <kbd>Q</kbd> QR · <kbd>F</kbd> pantalla completa · <kbd>H</kbd> ocultar interfaz</p>
+  <p class="credits">A partir de «Quantum &amp; Arts: a dialogue», de Rucha Benare y Matías Bilkis. Homenaje a Joan Miró y a «The Border Territory», de W. H. Zurek (<i>Physics Today</i>, 1991).</p>
+</dialog>
+
+<dialog id="qr" class="sheet qr">
+  <button class="close" data-close aria-label="cerrar">×</button>
+  <h3>Abrilo en tu celular</h3>
+  <canvas id="qrCanvas" width="600" height="600"></canvas>
+  <p class="url" id="qrUrl"></p>
+</dialog>
+
+<script src="vendor/qrcode.min.js" defer></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
