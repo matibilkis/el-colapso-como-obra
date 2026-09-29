@@ -41,11 +41,19 @@ export class MicInput {
     const raw = clamp((rms - this.floor * 1.7) * 13 * this.sens);
     this.level = approach(this.level, raw, raw > this.level ? 16 : 5, dt);
 
-    // clap: sudden, impulsive peak
+    // clap: a sudden impulsive peak that dies away within ~0.1 s (voice and tones sustain, so they don't count)
     let clap = false;
     const crest = peak / (rms + 1e-6);
-    if (peak > Math.max(0.2 / this.sens, this._peakAvg * 5) && crest > 3.4 && now - this._lastClap > 0.4) {
-      clap = true; this._lastClap = now;
+    if (!this._cand && peak > Math.max(0.2 / this.sens, this._peakAvg * 5) && crest > 3.4 && now - this._lastClap > 0.4) {
+      this._cand = { t: now, maxRms: rms };
+    }
+    if (this._cand) {
+      const age = now - this._cand.t;
+      if (age < 0.05) this._cand.maxRms = Math.max(this._cand.maxRms, rms);
+      else if (age > 0.12) {
+        if (rms < this._cand.maxRms * 0.35) { clap = true; this._lastClap = now; }
+        this._cand = null;
+      }
     }
     this._peakAvg = lerp(this._peakAvg, peak, 0.04);
 
